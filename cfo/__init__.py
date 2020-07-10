@@ -1,1 +1,1 @@
-from .utils import API as firetower
+from .utils import API
