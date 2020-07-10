@@ -14,7 +14,7 @@ CATALOG = "cfo"
 
 # logging setup
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.WARNING,
     format=("%(asctime)s (%(relativeCreated)d) %(levelname)s %(name)s [%(funcName)s:%(lineno)d] %(message)s"),
     stream=sys.stdout,
 )
