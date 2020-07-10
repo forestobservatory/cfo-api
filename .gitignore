@@ -1,3 +1,6 @@
 .zedstate
 *.pyc
 *__pycache__/*
+build/*
+dist/*
+cfo.egg-info/*
