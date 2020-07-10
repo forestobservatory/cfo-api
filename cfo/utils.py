@@ -112,6 +112,7 @@ class API(object):
         del password
         if status == 200:
             LOGGER.info("Authentication successful")
-            self._token = token
+            auth = {"Authentication": f"Bearer {token}"}
+            self._session.headers.update(auth)
         else:
             LOGGER.debug("Authentication failed with status code %s", status)
