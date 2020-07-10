@@ -58,6 +58,11 @@ Instead, you can enter your CFO account's email/password as you instatiate the A
 import cfo
 firetower = cfo.API()
 firetower.authenticate()
+```
+
+You'll be prompted to enter the following:
+
+```
 >>> CFO E-mail: example@host.com
 >>> CFO Password: **********
 ```
