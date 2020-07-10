@@ -9,8 +9,8 @@ import requests
 from retrying import retry
 
 # global parameters
-REQUEST_TIMEOUT = 1.72  # seconds to wait for a response
 URL = "https://api.salo.ai"
+CATALOG = "cfo"
 
 # logging setup
 logging.basicConfig(
@@ -19,6 +19,15 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 LOGGER = logging.getLogger(__name__)
+
+# define the endpoints
+ENDPOINTS = {
+    "auth": "/users/auth",
+    "refresh": "/users/auth/refresh",
+    "search": "/api/v1/search",
+    "fetch": "/api/v1/fetch",
+    "styles": "/api/v1/styles",
+}
 
 
 # get user input for user/pass
@@ -73,10 +82,15 @@ class API(object):
         # set empty attributes to be retrieved later
         self._token = None
 
+    @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def get_token(self, email: str, password: str):
         """
+        Retrieves a JWT token for the email/password combo
+        :param email: registered email address
+        :param password: CFO account password
+        :return: (token, status_code)
         """
-        endpoint = "/users/auth"
+        endpoint = ENDPOINTS["auth"]
         request_url = f"{URL}{endpoint}"
         body = {"email": email, "password": password}
         response = self._session.post(request_url, json=body)
@@ -92,8 +106,7 @@ class API(object):
         return token, response.status_code
 
     def authenticate(self):
-        """
-        """
+        """Retrieves a JWT authentication token"""
         email, password = get_email_pass()
         token, status = self.get_token(email, password)
         del password
