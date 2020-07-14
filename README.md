@@ -30,7 +30,7 @@ cd cfo-api
 python setup.py install
 ```
 
-Once the library is installed, you should be able to load the `cfo` module in python. Instatiate the `firetower` class to begin working with the Forest Observatory API.
+Once the library is installed, you should be able to load the `cfo` module in python. Instatiate the `API` class to begin working with the Forest Observatory API.
 
 ```python
 import cfo
