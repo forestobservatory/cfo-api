@@ -1,4 +1,4 @@
-name: cfo-dev
+name: cfo
 
 channels:
   - conda-forge
