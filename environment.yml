@@ -8,6 +8,7 @@ dependencies:
   - black
   - flake8
   - isort
+  - mock
   - pre-commit
   - pytest
   - pytest-cov
