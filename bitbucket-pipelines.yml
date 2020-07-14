@@ -3,6 +3,7 @@ definitions:
     - step: &unit-tests
         name: Run unit tests
         script:
+          - export PYTHONPATH=$PYTHONPATH:/opt/atlassian/pipelines/agent/build
           - conda run --name cfo pytest --cov --cov-report=xml:test-results/results.xml --cov-report=term-missing:skip-covered
   images:
     - image: &testing
