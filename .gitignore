@@ -4,3 +4,6 @@
 build/*
 dist/*
 cfo.egg-info/*
+.make/*
+.gcloudignore
+.dockerignore
