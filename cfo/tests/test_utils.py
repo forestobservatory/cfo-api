@@ -46,3 +46,10 @@ def test_get_email_pass():
     assert p == password
     assert e != password
     assert p != email
+
+
+def test_API():
+    """Tests creation/functions of the CFO API class"""
+    firetower = utils.API()
+    assert "authenticate" in dir(firetower)
+    assert "get_token" in dir(firetower)
