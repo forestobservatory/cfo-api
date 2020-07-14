@@ -1,0 +1,23 @@
+definitions:
+  steps:
+    - step: &unit-tests
+        name: Run unit tests
+        script:
+          - conda run --name cfo pytest --cov --cov-report=xml:test-results/results.xml --cov-report=term-missing:skip-covered
+  images:
+    - image: &testing
+        name: us.gcr.io/california-fores-1547767414612/cfo-api:testing
+        username: _json_key
+        password: '$GCR_JSON_KEY'
+        
+pipelines:
+  pull-requests:
+    '**':
+      - step:
+          <<: *unit-tests
+          image: *testing
+  branches:
+    master:
+      - step:
+          <<: *unit-tests
+          image: *testing

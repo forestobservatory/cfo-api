@@ -17,7 +17,7 @@ help:
 	@echo "   run tests"
 
 # environment variables
-CONDA_ENV=cfo-dev
+CONDA_ENV=cfo
 CONDA_RUN=conda run --name ${CONDA_ENV}
 DOCKER_IMAGE=us.gcr.io/california-fores-1547767414612/cfo-api
 DOCKER_TAG_GIT:=$(shell git rev-parse --short=12 HEAD)

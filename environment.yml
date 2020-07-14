@@ -1,10 +1,16 @@
-name: cfo
+name: cfo-dev
 
 channels:
   - conda-forge
 
 dependencies:
   - python=3.7.6
+  - black
+  - flake8
+  - isort
+  - pre-commit
+  - pytest
+  - pytest-cov
   - pip
   - pip:
     - -r file:requirements.txt
