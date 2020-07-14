@@ -7,3 +7,4 @@ cfo.egg-info/*
 .make/*
 .gcloudignore
 .dockerignore
+.coverage
