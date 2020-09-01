@@ -46,7 +46,7 @@ There are two methods for authentication: setting environment variables or passi
 This is the lowest friction but least secure approach. You'll set the following two variables in your `.bashrc` profile or elsewhere.
 
 ```bash
-export CFO_EMAIL=example@host.com
+export CFO_EMAIL=slug@forest.net
 export CFO_PASS=mytypedpassword
 ```
 
@@ -63,7 +63,7 @@ firetower.authenticate()
 You'll be prompted to enter the following:
 
 ```
->>> CFO E-mail: example@host.com
+>>> CFO E-mail: slug@forest.net
 >>> CFO Password: **********
 ```
 
