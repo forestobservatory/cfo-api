@@ -1,5 +1,8 @@
 """Convenience functions for interacting with the CFO catalog in the Salo Sciences REST API"""
 import json
+from functools import wraps
+import inspect
+import re
 import logging
 import os
 import sys
@@ -14,7 +17,7 @@ CATALOG = "cfo"
 
 # logging setup
 logging.basicConfig(
-    level=logging.WARNING,
+    level=logging.DEBUG,
     format=("%(asctime)s (%(relativeCreated)d) %(levelname)s %(name)s [%(funcName)s:%(lineno)d] %(message)s"),
     stream=sys.stdout,
 )
@@ -27,8 +30,43 @@ ENDPOINTS = {
     "search": "/api/v1/search",
     "fetch": "/api/v1/fetch",
     "styles": "/api/v1/styles",
+    "pixel_pick": "/api/v1/pixel_pick",
 }
 
+
+def auth_required():
+    """Decorator to require authorization before a request is made"""
+    def decorator(view):
+        @wraps(view)
+        def wrapper(*args, **kwargs):
+            
+            self = args[0]
+            name = view.__name__
+            warning = f"Authentication is required for function .{name}()"
+            
+            # first run auth
+            if "Authorization" not in self._session.headers:
+                status = self.authenticate()
+                if status != 200:
+                    LOGGER.warning(warning)
+                    return None
+                
+            if not self._session.headers["Authorization"].startswith("Bearer "):
+                LOGGER.warning("Authorization header is not a bearer type")
+                LOGGER.warning(warning)
+                return None
+
+            matches = re.match(r"^Bearer (\S+)$", self._session.headers["Authorization"])
+            if not matches:
+                LOGGER.warning("Invalid bearer token format")
+                LOGGER.warning(warning)
+                return None
+                
+            return view(*args, **kwargs)
+                
+        return wrapper
+        
+    return decorator
 
 # get user input for user/pass
 def get_input(data_type: str):
@@ -112,7 +150,15 @@ class API(object):
         del password
         if status == 200:
             LOGGER.info("Authentication successful")
-            auth = {"Authentication": f"Bearer {token}"}
+            auth = {"Authorization": f"Bearer {token}"}
             self._session.headers.update(auth)
         else:
-            LOGGER.debug("Authentication failed with status code %s", status)
+            LOGGER.warning(f"Authentication failed with status code {status}")
+
+        return status
+
+    @auth_required()        
+    def search(self):
+        """
+        """
+        print('searched!')
