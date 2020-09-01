@@ -1,7 +1,6 @@
 """Convenience functions for interacting with the CFO catalog in the Salo Sciences REST API"""
 import json
 from functools import wraps
-import inspect
 import re
 import logging
 import os
@@ -36,21 +35,22 @@ ENDPOINTS = {
 
 def auth_required():
     """Decorator to require authorization before a request is made"""
+
     def decorator(view):
         @wraps(view)
         def wrapper(*args, **kwargs):
-            
+
             self = args[0]
             name = view.__name__
             warning = f"Authentication is required for function .{name}()"
-            
+
             # first run auth
             if "Authorization" not in self._session.headers:
                 status = self.authenticate()
                 if status != 200:
                     LOGGER.warning(warning)
                     return None
-                
+
             if not self._session.headers["Authorization"].startswith("Bearer "):
                 LOGGER.warning("Authorization header is not a bearer type")
                 LOGGER.warning(warning)
@@ -61,12 +61,13 @@ def auth_required():
                 LOGGER.warning("Invalid bearer token format")
                 LOGGER.warning(warning)
                 return None
-                
+
             return view(*args, **kwargs)
-                
+
         return wrapper
-        
+
     return decorator
+
 
 # get user input for user/pass
 def get_input(data_type: str):
@@ -120,6 +121,10 @@ class API(object):
         # set empty attributes to be retrieved later
         self._token = None
 
+    def help(self):
+        """Returns the docstring for the main class"""
+        return self.__doc__
+
     @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def get_token(self, email: str, password: str):
         """
@@ -144,7 +149,10 @@ class API(object):
         return token, response.status_code
 
     def authenticate(self):
-        """Retrieves a JWT authentication token"""
+        """
+        Retrieves a JWT authentication token. Requires a forestobservatory.com account.
+        :return status_code: the API response status code
+        """
         email, password = get_email_pass()
         token, status = self.get_token(email, password)
         del password
@@ -157,8 +165,10 @@ class API(object):
 
         return status
 
-    @auth_required()        
-    def search(self):
+    @auth_required()
+    def search(self, asset_id: str = None, bbox: list = None, date=None):
         """
         """
-        print('searched!')
+        catalog = [CATALOG]
+        print(catalog)
+        print("searched!")
