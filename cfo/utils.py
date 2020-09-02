@@ -16,7 +16,7 @@ CATALOG = "cfo"
 
 # logging setup
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.WARNING,
     format=("%(asctime)s (%(relativeCreated)d) %(levelname)s %(name)s [%(funcName)s:%(lineno)d] %(message)s"),
     stream=sys.stdout,
 )
@@ -34,7 +34,7 @@ ENDPOINTS = {
 
 # set the path to package data
 package_path = os.path.realpath(__file__)
-package_dir = os.path.dirname(os.path.dirname(package_path))
+package_dir = os.path.dirname(package_path)
 json_path = os.path.join(package_dir, "data", "paths.json")
 with open(json_path, "r+") as f:
     PATHS = json.loads(f.read())
@@ -89,10 +89,11 @@ def get_input(data_type: str):
             user_input = getpass(prompt)
         else:
             user_input = input(prompt)
+
+        return user_input
+
     except Exception as error:
         LOGGER.exception(error)
-
-    return user_input
 
 
 def get_email_pass():
@@ -101,7 +102,7 @@ def get_email_pass():
     :return (email, password): tuple of strings for the users input email/password
     """
 
-    # check environment variables firest
+    # check environment variables first
     email = os.getenv("CFO_EMAIL")
     password = os.getenv("CFO_PASS")
 
