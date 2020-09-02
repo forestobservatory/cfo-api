@@ -41,7 +41,7 @@ update: conda-update pip-update misc-update
 
 # run tests
 test:
-	${CONDA_RUN} pytest --cov --no-cov-on-fail --cov-report=term-missing:skip-covered
+	${CONDA_RUN} pip install . && pytest --cov --no-cov-on-fail --cov-report=term-missing:skip-covered
 
 
 # DETAILED ENTRIES
