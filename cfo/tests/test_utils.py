@@ -39,17 +39,14 @@ def test_get_input():
         assert utils.get_input(email) != password
 
 
-def test_get_email_pass():
-    """Tests retreival of email/password combo"""
-    e, p = utils.get_email_pass()
-    assert e == email
-    assert p == password
-    assert e != password
-    assert p != email
-
-
 def test_API():
     """Tests creation/functions of the CFO API class"""
     firetower = utils.API()
-    assert "authenticate" in dir(firetower)
-    assert "get_token" in dir(firetower)
+    methods = dir(firetower)
+    assert "authenticate" in methods
+    assert "help" in methods
+    assert "list_categories" in methods
+    assert "list_geographies" in methods
+    assert "list_geography_types" in methods
+    assert "list_metrics" in methods
+    assert "search" in methods
