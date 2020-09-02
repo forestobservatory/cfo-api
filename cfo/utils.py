@@ -276,7 +276,7 @@ class API(object):
         """
         # construct an asset ID if not explicitly passed
         if asset_id is None:
-            construct_asset_id(
+            asset_id = construct_asset_id(
                 geography=geography,
                 category=category,
                 metric=metric,
