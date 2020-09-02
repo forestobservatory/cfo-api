@@ -26,10 +26,10 @@ LOGGER = logging.getLogger(__name__)
 ENDPOINTS = {
     "auth": "/users/auth",
     "refresh": "/users/auth/refresh",
-    "search": "/api/v1/search",
-    "fetch": "/api/v1/fetch",
-    "styles": "/api/v1/styles",
-    "pixel_pick": "/api/v1/pixel_pick",
+    "search": "/data/search",
+    "fetch": "/data/fetch",
+    "styles": "/data/styles",
+    "pixel_pick": "/data/pixel_pick",
 }
 
 
@@ -125,8 +125,45 @@ class API(object):
         """Returns the docstring for the main class"""
         return self.__doc__
 
+    def authenticate(self):
+        """
+        Retrieves a JWT authentication token. Requires a forestobservatory.com account.
+        :return status_code: the API response status code
+        """
+        email, password = get_email_pass()
+        token, status = self._auth_request(email, password)
+        del password
+        if status == 200:
+            LOGGER.info("Authentication successful")
+            auth = {"Authorization": f"Bearer {token}"}
+            self._session.headers.update(auth)
+        else:
+            LOGGER.warning(f"Authentication failed with status code {status}")
+
+        return status
+
+    @auth_required()
+    def search(
+        self,
+        geography: str = None,
+        category: str = None,
+        metric: str = None,
+        year: int = None,
+        timeOfYear: str = None,
+        resolution: int = None,
+        raw: bool = False,
+    ):
+        """
+        Queries the CFO API for datasets
+        """
+        response = self._search_request()
+        if raw:
+            return response
+        else:
+            return response.json()["features"]
+
     @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
-    def get_token(self, email: str, password: str):
+    def _auth_request(self, email: str, password: str):
         """
         Retrieves a JWT token for the email/password combo
         :param email: registered email address
@@ -148,27 +185,21 @@ class API(object):
 
         return token, response.status_code
 
-    def authenticate(self):
+    @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
+    def _search_request(
+        self, catalog: str = CATALOG, asset_id: str = None, bbox: list = None, date: str = None, description: str = None
+    ):
         """
-        Retrieves a JWT authentication token. Requires a forestobservatory.com account.
-        :return status_code: the API response status code
         """
-        email, password = get_email_pass()
-        token, status = self.get_token(email, password)
-        del password
-        if status == 200:
-            LOGGER.info("Authentication successful")
-            auth = {"Authorization": f"Bearer {token}"}
-            self._session.headers.update(auth)
-        else:
-            LOGGER.warning(f"Authentication failed with status code {status}")
+        endpoint = ENDPOINTS["search"]
+        request_url = f"{URL}{endpoint}"
+        body = {
+            "catalog_list": catalog,
+            "asset_id": asset_id,
+            "bounding_box": bbox,
+            "datetime": date,
+            "description": description,
+        }
+        response = self._session.post(request_url, json=body)
 
-        return status
-
-    @auth_required()
-    def search(self, asset_id: str = None, bbox: list = None, date=None):
-        """
-        """
-        catalog = [CATALOG]
-        print(catalog)
-        print("searched!")
+        return response

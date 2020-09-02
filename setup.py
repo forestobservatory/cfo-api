@@ -10,4 +10,5 @@ setup(
     python_requires=">=3.0",
     install_requires=["requests", "retrying"],
     author="Salo Sciences",
+    package_data={"data": ["data/paths.json"]},
 )
