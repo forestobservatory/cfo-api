@@ -10,5 +10,6 @@ setup(
     python_requires=">=3.0",
     install_requires=["requests", "retrying"],
     author="Salo Sciences",
-    package_data={"data": ["data/paths.json"]},
+    include_package_data=True,
+    package_data={"cfo": ["data/paths.json"]},
 )
