@@ -260,6 +260,7 @@ class API(object):
         bbox: list = None,
         description: str = None,
         raw: bool = False,
+        just_assets: bool = False,
     ):
         """
         Queries the CFO API for datasets.
@@ -273,6 +274,7 @@ class API(object):
         :param bbox: returns only results that intersect this box [xmin, ymin, xmax, ymax] (in lat/lon)
         :param description: a string that may match the dataset description
         :param raw: specifies whether to return the full response object. default is just json
+        :param just_assets: specified whether to return just the asset IDs of the search result.
         :return response: the api search result
         """
         # construct an asset ID if not explicitly passed
@@ -292,6 +294,10 @@ class API(object):
         # and return the data
         if raw:
             return response
+        elif just_assets:
+            features = response.json()["features"]
+            asset_ids = [feature["asset_id"] for feature in features]
+            return asset_ids
         else:
             return response.json()["features"]
 
