@@ -8,3 +8,4 @@ cfo.egg-info/*
 .gcloudignore
 .dockerignore
 .coverage
+*.tif
