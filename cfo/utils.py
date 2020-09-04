@@ -167,6 +167,21 @@ def construct_asset_id(
     return asset_id
 
 
+def check(response: object):
+    """
+    Evaluates the response code and message returned by a search request
+    :return [success, msg]: a boolean success/fail on the request and the response message
+    """
+    if response.status_code == 200:
+        success = True
+        msg = "slugs rule"
+    else:
+        success = False
+        msg = response.content
+
+    return [success, msg]
+
+
 # set the API class
 class API(object):
     """Utility class for Salo API requests"""
@@ -218,7 +233,7 @@ class API(object):
         """
         Lists the specific geographic areas available
         :param gtype: the type of geography to list (see .list_geography_types())
-        :return geographies: a list of type is specified, a dictionary with each geography if not
+        :return geographies: a list if type is specified, a dictionary with each geography if not
         """
         if type is None:
             return PATHS["geography"]
@@ -229,6 +244,13 @@ class API(object):
                 LOGGER.warning(f"Unsupported category: {gtype}")
                 LOGGER.warning(f"Must be one of {', '.join(self.list_geography_types())}")
                 return None
+
+    def list_fetch_types(self):
+        """
+        Lists the different link types that can be retrieved from the fetch() routine
+        :returns fetch_types: list of strings
+        """
+        return ["wms", "signed_url", "uri", "url", "wms_preview"]
 
     def authenticate(self):
         """
@@ -291,15 +313,120 @@ class API(object):
         # send the request
         response = self._search_request(asset_id=asset_id, bbox=bbox, description=description)
 
-        # and return the data
-        if raw:
-            return response
-        elif just_assets:
-            features = response.json()["features"]
-            asset_ids = [feature["asset_id"] for feature in features]
-            return asset_ids
+        # check for failures
+        success, msg = check(response)
+
+        # return the data on a success
+        if success:
+            if raw:
+                return response
+            elif just_assets:
+                features = response.json()["features"]
+                asset_ids = [feature["asset_id"] for feature in features]
+                return asset_ids
+            else:
+                return response.json()["features"]
+
+        # otherwise, debug
         else:
-            return response.json()["features"]
+            LOGGER.debug(msg)
+            return msg
+
+    @auth_required()
+    def fetch(
+        self,
+        asset_id: str,
+        dl: bool = True,
+        wms: bool = False,
+        browser: bool = False,
+        bucket: bool = False,
+        fetch_types: list = None,
+    ):
+        """
+        Fetches the download / map / file url for an asset
+        :param asset_id: a CFO asset ID string (often returned from search() )
+        :param dl: specifies whether to return the asset download url (a google cloud signed url)
+        :param wms: specifies whether to return a wms url (for web mapping applications)
+        :param browser: returns a wms preview url (to preview the asset in your browser)
+        :param bucket: returns a google cloud bucket url to the asset id
+        :param fetch_types: the full range of fetch options accepted by the API (from get_fetch_types())
+        :return response: the api fetch result. returns a string if only one boolean parameter passed, otherwise a dict.
+        """
+        # handle multiple pathways of parameter setting
+        responses = dict()
+        params = list()
+        n_params = 0
+        link = "link"
+
+        # check each fetch type
+        if dl:
+            param = "dl"
+            response = self._fetch_request(asset_id, fetch_type="signed_url")
+            success, msg = check(response)
+            if success:
+                responses[param] = response.json()[link]
+                params.append(param)
+                n_params += 1
+            else:
+                LOGGER.debug(msg)
+                return msg
+        if wms:
+            param = "wms"
+            response = self._fetch_request(asset_id, fetch_type="wms")
+            success, msg = check(response)
+            if success:
+                responses[param] = response.json()[link]
+                params.append(param)
+                n_params += 1
+            else:
+                LOGGER.debug(msg)
+                return msg
+        if browser:
+            param = "browser"
+            response = self._fetch_request(asset_id, fetch_type="wms_preview")
+            success, msg = check(response)
+            if success:
+                responses[param] = response.json()[link]
+                params.append(param)
+                n_params += 1
+            else:
+                LOGGER.debug(msg)
+                return msg
+        if bucket:
+            param = "bucket"
+            response = self._fetch_request(asset_id, fetch_type="uri")
+            success, msg = check(response)
+            if success:
+                responses[param] = response.json()[link]
+                params.append(param)
+                n_params += 1
+            else:
+                LOGGER.debug(msg)
+                return msg
+
+        # run through types last
+        if fetch_types is not None:
+            supported = set(self.list_fetch_types())
+            if supported.intersection(set(fetch_types)) != supported:
+                LOGGER.debug(f"Unsupported type parameter passed: [{', '.join(fetch_types)}]")
+                LOGGER.debug(f"Supported type parameters: [{', '.join(supported)}]")
+                return None
+        else:
+            for fetch_type in fetch_types:
+                response = self._fetch_request(asset_id, fetch_type)
+                success, msg = check(response)
+                if success:
+                    responses[fetch_type] = response.json()[link]
+                    n_params += 1
+                else:
+                    LOGGER.debug(msg)
+                    return msg
+
+        # determine what you return based on the number of passed options
+        if n_params == 1:
+            return responses[params[0]]  # just the link url
+        else:
+            return responses  # the multi-param dictionary
 
     @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def _auth_request(self, email: str, password: str):
@@ -331,7 +458,7 @@ class API(object):
         """
         Submits the POST request to the search endpoint
         :param catalog: the data catalog to query
-        :param asset_id: a partialfull cfo asset id to search by
+        :param asset_id: a partial/full cfo asset id to search for
         :param bbox: a lat/lon bounding box of [xmin, ymin, xmax, ymax] extent
         :param date: a utc datetime to query by
         :param description: a partial/full dataset description to search by
@@ -345,6 +472,26 @@ class API(object):
             "bounding_box": bbox,
             "datetime": date,
             "description": description,
+        }
+        response = self._session.post(request_url, json=body)
+
+        return response
+
+    @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
+    def _fetch_request(self, asset_id: str, fetch_type: str, catalog: str = CATALOG):
+        """
+        Submits the POST request to the search endpoint
+        :param asset_id: a full cfo asset id to fetch
+        :param fetch_type: the type of url to return
+        :param catalog: the data catalog to query
+        :return response: the request response
+        """
+        endpoint = ENDPOINTS["fetch"]
+        request_url = f"{URL}{endpoint}"
+        body = {
+            "catalog": catalog,
+            "asset_id": asset_id,
+            "type": fetch_type,
         }
         response = self._session.post(request_url, json=body)
 
