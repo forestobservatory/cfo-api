@@ -330,6 +330,39 @@ class API(object):
             LOGGER.debug(msg)
             return msg
 
+    def download(self, asset_id: str, path: str = None):
+        """
+        Downloads an asset ID to your local machine
+        :param asset_id: a CFO asset ID string (often returned from search() )
+        :param path: the output file path. Set to ./{asset_id}.tif by default. Appends '.tif' if not set.
+        :return:
+        """
+        # set default messages/params
+        err = f"Failed to download asset: {asset_id}"
+
+        # set default path behavior
+        if path is None:
+            path = f"{asset_id}.tif"
+        else:
+            if ".tif" not in path.lower():
+                path = f"{path}.tif"
+
+        # check that it's writeable
+        if not os.access(path, os.W_OK):
+            LOGGER.debug(err)
+            LOGGER.debug(f"Unable to write to file: {path}")
+            pass
+
+        # fetch the url by asset ID
+        url = self.fetch(asset_id, dl=True)
+
+        # then stream the file to disk
+        r = requests.get(url, stream=True)
+        if r.ok:
+            with open(path, "wb") as f:
+                for chunk in r.iter_content(chunk_size=128):
+                    f.write(chunk)
+
     def fetch(
         self, asset_id: str, dl: bool = False, wms: bool = False, bucket: bool = False, fetch_types: list = None,
     ):
@@ -364,7 +397,7 @@ class API(object):
                 n_params += 1
             else:
                 LOGGER.debug(msg)
-                return msg
+                raise
         if wms:
             param = "wms"
             response = self._fetch_request(asset_id, fetch_type="wms")
@@ -375,7 +408,7 @@ class API(object):
                 n_params += 1
             else:
                 LOGGER.debug(msg)
-                return msg
+                raise
         if bucket:
             param = "bucket"
             response = self._fetch_request(asset_id, fetch_type="uri")
@@ -386,7 +419,7 @@ class API(object):
                 n_params += 1
             else:
                 LOGGER.debug(msg)
-                return msg
+                raise
 
         # run through types last
         if fetch_types is not None:
@@ -404,7 +437,7 @@ class API(object):
                         n_params += 1
                     else:
                         LOGGER.debug(msg)
-                        return msg
+                        raise
 
         # determine what you return based on the number of passed options
         if n_params == 1:
