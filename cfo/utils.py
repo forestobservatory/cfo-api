@@ -329,6 +329,13 @@ class API(object):
         self, catalog: str = CATALOG, asset_id: str = None, bbox: list = None, date: str = None, description: str = None
     ):
         """
+        Submits the POST request to the search endpoint
+        :param catalog: the data catalog to query
+        :param asset_id: a partialfull cfo asset id to search by
+        :param bbox: a lat/lon bounding box of [xmin, ymin, xmax, ymax] extent
+        :param date: a utc datetime to query by
+        :param description: a partial/full dataset description to search by
+        :return response: the request response
         """
         endpoint = ENDPOINTS["search"]
         request_url = f"{URL}{endpoint}"
