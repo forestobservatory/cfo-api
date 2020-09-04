@@ -1,1 +1,1 @@
-from .utils import API
+from .utils import API as api
