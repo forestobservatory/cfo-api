@@ -389,21 +389,11 @@ class API(object):
         :param path: the output file path. Set to ./{asset_id}.tif by default. Appends '.tif' if not set.
         :return:
         """
-        # set default messages/params
-        err = f"Failed to download asset: {asset_id}"
-
-        # set default path behavior
         if path is None:
-            path = f"{asset_id}.tif"
+            path = os.path.join(os.getcwd(), f"{asset_id}.tif")
         else:
             if ".tif" not in path.lower():
                 path = f"{path}.tif"
-
-        # check that it's writeable
-        if not os.access(path, os.W_OK):
-            LOGGER.warning(err)
-            LOGGER.warning(f"Unable to write to file: {path}")
-            pass
 
         # fetch the url by asset ID
         url = self.fetch(asset_id, dl=True)
