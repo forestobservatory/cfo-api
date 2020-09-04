@@ -229,19 +229,19 @@ class API(object):
         """
         return list(PATHS["geography"].keys())
 
-    def list_geographies(self, gtype: str = None):
+    def list_geographies(self, by: str = None):
         """
         Lists the specific geographic areas available
-        :param gtype: the type of geography to list (see .list_geography_types())
+        :param by: the type of geography to list (see .list_geography_types())
         :return geographies: a list if type is specified, a dictionary with each geography if not
         """
         if type is None:
             return PATHS["geography"]
         else:
             try:
-                return PATHS["geography"][gtype]
+                return PATHS["geography"][by]
             except KeyError:
-                LOGGER.warning(f"Unsupported category: {gtype}")
+                LOGGER.warning(f"Unsupported category: {by}")
                 LOGGER.warning(f"Must be one of {', '.join(self.list_geography_types())}")
                 return None
 
@@ -334,20 +334,13 @@ class API(object):
 
     @auth_required()
     def fetch(
-        self,
-        asset_id: str,
-        dl: bool = True,
-        wms: bool = False,
-        browser: bool = False,
-        bucket: bool = False,
-        fetch_types: list = None,
+        self, asset_id: str, dl: bool = False, wms: bool = False, bucket: bool = False, fetch_types: list = None,
     ):
         """
         Fetches the download / map / file url for an asset
         :param asset_id: a CFO asset ID string (often returned from search() )
         :param dl: specifies whether to return the asset download url (a google cloud signed url)
         :param wms: specifies whether to return a wms url (for web mapping applications)
-        :param browser: returns a wms preview url (to preview the asset in your browser)
         :param bucket: returns a google cloud bucket url to the asset id
         :param fetch_types: the full range of fetch options accepted by the API (from get_fetch_types())
         :return response: the api fetch result. returns a string if only one boolean parameter passed, otherwise a dict.
@@ -357,6 +350,11 @@ class API(object):
         params = list()
         n_params = 0
         link = "link"
+
+        # make sure something is set
+        if True not in [dl, wms, bucket] and True not in fetch_types:
+            # set a default option
+            dl = True
 
         # check each fetch type
         if dl:
@@ -373,17 +371,6 @@ class API(object):
         if wms:
             param = "wms"
             response = self._fetch_request(asset_id, fetch_type="wms")
-            success, msg = check(response)
-            if success:
-                responses[param] = response.json()[link]
-                params.append(param)
-                n_params += 1
-            else:
-                LOGGER.debug(msg)
-                return msg
-        if browser:
-            param = "browser"
-            response = self._fetch_request(asset_id, fetch_type="wms_preview")
             success, msg = check(response)
             if success:
                 responses[param] = response.json()[link]
@@ -411,16 +398,16 @@ class API(object):
                 LOGGER.debug(f"Unsupported type parameter passed: [{', '.join(fetch_types)}]")
                 LOGGER.debug(f"Supported type parameters: [{', '.join(supported)}]")
                 return None
-        else:
-            for fetch_type in fetch_types:
-                response = self._fetch_request(asset_id, fetch_type)
-                success, msg = check(response)
-                if success:
-                    responses[fetch_type] = response.json()[link]
-                    n_params += 1
-                else:
-                    LOGGER.debug(msg)
-                    return msg
+            else:
+                for fetch_type in fetch_types:
+                    response = self._fetch_request(asset_id, fetch_type)
+                    success, msg = check(response)
+                    if success:
+                        responses[fetch_type] = response.json()[link]
+                        n_params += 1
+                    else:
+                        LOGGER.debug(msg)
+                        return msg
 
         # determine what you return based on the number of passed options
         if n_params == 1:
