@@ -236,6 +236,13 @@ class API(object):
                 LOGGER.warning(f"Must be one of {', '.join(self.list_categories())}")
                 return None
 
+    def list_fuel_metrics(self):
+        """
+        Lists the veg metrics needed to create a landscape file
+        :return metrics: a list of "Vegetation" metrics used to generate landscape files
+        """
+        return ["SurfaceFuels", "CanopyCover", "CanopyHeight", "CanopyBaseHeight", "CanopyBulkDensity"]
+
     def list_geography_types(self):
         """
         Lists the broad geography classes (state, watershed, etc.)
