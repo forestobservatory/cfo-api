@@ -28,7 +28,6 @@ ENDPOINTS = {
     "refresh": "/users/auth/refresh",
     "search": "/data/search",
     "fetch": "/data/fetch",
-    "styles": "/data/styles",
     "pixel_pick": "/data/pixel_pick",
 }
 
@@ -269,7 +268,6 @@ class API(object):
 
         return status
 
-    @auth_required()
     def search(
         self,
         geography: str = None,
@@ -332,7 +330,6 @@ class API(object):
             LOGGER.debug(msg)
             return msg
 
-    @auth_required()
     def fetch(
         self, asset_id: str, dl: bool = False, wms: bool = False, bucket: bool = False, fetch_types: list = None,
     ):
@@ -438,6 +435,7 @@ class API(object):
 
         return token, response.status_code
 
+    @auth_required()
     @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def _search_request(
         self, catalog: str = CATALOG, asset_id: str = None, bbox: list = None, date: str = None, description: str = None
@@ -464,6 +462,7 @@ class API(object):
 
         return response
 
+    @auth_required()
     @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def _fetch_request(self, asset_id: str, fetch_type: str, catalog: str = CATALOG):
         """
