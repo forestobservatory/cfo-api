@@ -188,6 +188,9 @@ def check(response: object):
 
 def read_token_file(path: str):
     """
+    Reads a gzipped token tempfile
+    :param path: the path to the gzipped file
+    :return token: a token string
     """
     with gzip.open(path, "rb") as f:
         return f.read().decode()
@@ -195,6 +198,10 @@ def read_token_file(path: str):
 
 def write_token_file(token: str, path: str):
     """
+    Writes token data to a gzipped tempfile
+    :param token: a string containing the token data
+    :param path: the path to the output tempfile
+    :return:
     """
     with gzip.open(path, "wb") as f:
         f.write(token.encode("utf-8"))
