@@ -2,7 +2,9 @@
 from functools import wraps
 import re
 import logging
+import tempfile
 import json
+import gzip
 import os
 import sys
 from getpass import getpass
@@ -35,6 +37,12 @@ package_dir = os.path.dirname(package_path)
 json_path = os.path.join(package_dir, "data", "paths.json")
 with open(json_path, "r+") as f:
     PATHS = json.loads(f.read())
+
+# create a temp directory to store the jwt token
+TMP_DIR = os.path.join(tempfile.gettempdir(), "cfo")
+TMP_FILE = os.path.join(TMP_DIR, "token")
+if not os.path.exists(TMP_DIR):
+    os.mkdir(TMP_DIR)
 
 
 def auth_required():
@@ -178,6 +186,20 @@ def check(response: object):
     return [success, msg]
 
 
+def read_token_file(path: str):
+    """
+    """
+    with gzip.open(path, "rb") as f:
+        return f.read().decode()
+
+
+def write_token_file(token: str, path: str):
+    """
+    """
+    with gzip.open(path, "wb") as f:
+        f.write(token.encode("utf-8"))
+
+
 class API(object):
     """Utility class for Salo API requests"""
 
@@ -186,9 +208,6 @@ class API(object):
 
         # create the REST session
         self._session = requests.Session()
-
-        # set empty attributes to be retrieved later
-        self._token = None
 
     def help(self):
         """Returns the docstring for the main class"""
@@ -247,20 +266,43 @@ class API(object):
         """
         return ["wms", "signed_url", "uri", "url", "wms_preview"]
 
-    def authenticate(self):
+    def authenticate(self, ignore_temp: bool = False):
         """
         Retrieves a JWT authentication token. Requires a forestobservatory.com account.
         :return status_code: the API response status code
         """
-        email, password = get_email_pass()
-        token, status = self._auth_request(email, password)
-        del password
-        if status == 200:
-            LOGGER.info("Authentication successful")
-            auth = {"Authorization": f"Bearer {token}"}
-            self._session.headers.update(auth)
-        else:
-            LOGGER.warning(f"Authentication failed with status code {status}")
+        # check for a stored token
+        login = True
+        if not ignore_temp:
+            if os.path.exists(TMP_FILE):
+                try:
+                    token = read_token_file(TMP_FILE)
+                    LOGGER.info("Loaded cfo token")
+                    auth = {"Authorization": f"Bearer {token}"}
+                    self._session.headers.update(auth)
+                    login = False
+                    status = 200
+                except PermissionError:
+                    LOGGER.warning("Unable to read token from temp file")
+
+        # otherwise
+        if login:
+            email, password = get_email_pass()
+            token, status = self._auth_request(email, password)
+            del password
+            if status == 200:
+                LOGGER.info("Authentication successful")
+                auth = {"Authorization": f"Bearer {token}"}
+                self._session.headers.update(auth)
+
+                # write it to a temp file for convenience
+                try:
+                    write_token_file(token, TMP_FILE)
+                except PermissionError:
+                    pass
+
+            else:
+                LOGGER.warning(f"Authentication failed with status code {status}")
 
         return status
 
@@ -465,6 +507,7 @@ class API(object):
 
         else:
             token = None
+            LOGGER.warning("Authentication failed. Try and run .authenticate(ignore_temp=True)")
             LOGGER.warning(response.content)
 
         return token, response.status_code
