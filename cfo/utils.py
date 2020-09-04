@@ -16,9 +16,7 @@ CATALOG = "cfo"
 
 # logging setup
 logging.basicConfig(
-    level=logging.WARNING,
-    format=("%(asctime)s (%(relativeCreated)d) %(levelname)s %(name)s [%(funcName)s:%(lineno)d] %(message)s"),
-    stream=sys.stdout,
+    level=logging.INFO, format=("%(asctime)s %(levelname)s %(name)s [%(funcName)s] %(message)s"), stream=sys.stdout,
 )
 LOGGER = logging.getLogger(__name__)
 
@@ -75,7 +73,6 @@ def auth_required():
     return decorator
 
 
-# get user input for user/pass
 def get_input(data_type: str):
     """
     Gets command line user input
@@ -181,7 +178,6 @@ def check(response: object):
     return [success, msg]
 
 
-# set the API class
 class API(object):
     """Utility class for Salo API requests"""
 
@@ -327,7 +323,7 @@ class API(object):
 
         # otherwise, debug
         else:
-            LOGGER.debug(msg)
+            LOGGER.warning(msg)
             return msg
 
     def download(self, asset_id: str, path: str = None):
@@ -349,8 +345,8 @@ class API(object):
 
         # check that it's writeable
         if not os.access(path, os.W_OK):
-            LOGGER.debug(err)
-            LOGGER.debug(f"Unable to write to file: {path}")
+            LOGGER.warning(err)
+            LOGGER.warning(f"Unable to write to file: {path}")
             pass
 
         # fetch the url by asset ID
@@ -359,9 +355,14 @@ class API(object):
         # then stream the file to disk
         r = requests.get(url, stream=True)
         if r.ok:
+            LOGGER.info(f"Beginning download for: {asset_id}")
             with open(path, "wb") as f:
                 for chunk in r.iter_content(chunk_size=128):
                     f.write(chunk)
+
+            # check that it worked
+            if os.stat(path).st_size > 0:
+                LOGGER.info(f"Successfully downloaded {asset_id} to file: {path}")
 
     def fetch(
         self, asset_id: str, dl: bool = False, wms: bool = False, bucket: bool = False, fetch_types: list = None,
@@ -396,7 +397,7 @@ class API(object):
                 params.append(param)
                 n_params += 1
             else:
-                LOGGER.debug(msg)
+                LOGGER.warning(msg)
                 raise
         if wms:
             param = "wms"
@@ -407,7 +408,7 @@ class API(object):
                 params.append(param)
                 n_params += 1
             else:
-                LOGGER.debug(msg)
+                LOGGER.warning(msg)
                 raise
         if bucket:
             param = "bucket"
@@ -418,15 +419,15 @@ class API(object):
                 params.append(param)
                 n_params += 1
             else:
-                LOGGER.debug(msg)
+                LOGGER.warning(msg)
                 raise
 
         # run through types last
         if fetch_types is not None:
             supported = set(self.list_fetch_types())
             if supported.intersection(set(fetch_types)) != supported:
-                LOGGER.debug(f"Unsupported type parameter passed: [{', '.join(fetch_types)}]")
-                LOGGER.debug(f"Supported type parameters: [{', '.join(supported)}]")
+                LOGGER.warning(f"Unsupported type parameter passed: [{', '.join(fetch_types)}]")
+                LOGGER.warning(f"Supported type parameters: [{', '.join(supported)}]")
                 return None
             else:
                 for fetch_type in fetch_types:
@@ -436,7 +437,7 @@ class API(object):
                         responses[fetch_type] = response.json()[link]
                         n_params += 1
                     else:
-                        LOGGER.debug(msg)
+                        LOGGER.warning(msg)
                         raise
 
         # determine what you return based on the number of passed options
@@ -464,7 +465,7 @@ class API(object):
 
         else:
             token = None
-            LOGGER.debug(response.content)
+            LOGGER.warning(response.content)
 
         return token, response.status_code
 
