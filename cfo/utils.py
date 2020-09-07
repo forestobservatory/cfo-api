@@ -58,7 +58,7 @@ def auth_required():
 
             # first run auth
             if "Authorization" not in self._session.headers:
-                status = self.authenticate()
+                status = self.authenticate(ignore_temp=False)
                 if status != 200:
                     LOGGER.warning(warning)
                     return None
@@ -280,7 +280,7 @@ class API(object):
         """
         return ["wms", "signed_url", "uri", "url", "wms_preview"]
 
-    def authenticate(self, ignore_temp: bool = False):
+    def authenticate(self, ignore_temp: bool = True):
         """
         Retrieves a JWT authentication token. Requires a forestobservatory.com account.
         :return status_code: the API response status code
@@ -332,7 +332,7 @@ class API(object):
         bbox: list = None,
         description: str = None,
         raw: bool = False,
-        just_assets: bool = False,
+        just_assets: bool = True,
     ):
         """
         Queries the CFO API for datasets.
