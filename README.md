@@ -1,12 +1,16 @@
-<img src="cfo-logo.png" alt="California Forest Observatory" style="display: block; float: left; margin-right: 10px;"/>
-
-Python wrappers and a command line executable for accessing Forest Observatory data via the Salo API.
+<img src="cfo-logo.png" alt="California Forest Observatory" style="display: block; margin: auto;"/>
 
 # Introduction
 
 The [California Forest Observatory][cfo-web] (CFO) is a data-driven forest monitoring system that maps the drivers of wildfire behavior across the state—including vegetation fuels, weather, topography & infrastructure—from space.
 
-The `cfo` python library was designed to provide easy access to CFO datasets. Each dataset has a unique `asset_id`, and the `search` and `fetch` workflows were designed to query and download these assets. You can search for asset IDs by geography, data type, and time of year (`forest.search(geography="SantaCruzCounty", metric="CanopyHeight", year=2020)`), then fetch a URL to download the file (`forest.fetch(asset_id, dl=True)`) or a WMS URL to for web mapping (e.g. `forest.fetch(asset_id, wms=True)`). There's also a function to directly download the data to your loacal machine (`forest.download(asset_id, output_file)`). All CFO assets are stored and downloaded as GeoTIFFs.
+The `cfo` python library was designed to provide easy access to CFO datasets. Each dataset has a unique `asset_id`, and the `search` and `fetch` workflows were designed to query and download these assets. 
+- You can search for asset IDs by geography, data type, and time of year (`forest.search(geography="SantaCruzCounty", metric="CanopyHeight", year=2020)`)
+- Then fetch a URL to download the file (`forest.fetch(asset_id, dl=True)`) 
+- Or a WMS URL to for web mapping (e.g. `forest.fetch(asset_id, wms=True)`) 
+- There's also a function to directly download the data to your loacal machine (`forest.download(asset_id, output_file)`). 
+ 
+All CFO assets are stored and downloaded as GeoTIFFs.
 
 CFO data are available for free for non-commercial use. You must have a CFO account, which you can create by visiting [the web map][cfo-web], clicking the menu in the top right corner and selecting "Create an account." Please keep track of the e-mail address and password you used to create your Forest Observatory account, as you'll need them to authenticate API access.
 
