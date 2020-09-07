@@ -384,7 +384,7 @@ class API(object):
 
     def download(self, asset_id: str, path: str = None):
         """
-        Downloads an asset ID to your local machine
+        Downloads a CFO asset to your local machine
         :param asset_id: a CFO asset ID string (often returned from search() )
         :param path: the output file path. Set to ./{asset_id}.tif by default. Appends '.tif' if not set.
         :return:
