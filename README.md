@@ -6,10 +6,14 @@ The [California Forest Observatory][cfo-web] (CFO) is a data-driven forest monit
 
 The `cfo` python library was designed to provide easy access to CFO datasets, provided as geotiffs. Each dataset has a unique `asset_id`, and the `search` and `fetch` workflows were designed to query and download these assets. 
 
-- You can search for asset IDs by geography, data type, and time of year (`forest.search(geography="SantaCruzCounty", metric="CanopyHeight", year=2020)`)
-- You can download the data to your loacal machine (`forest.download(asset_id, output_file)`). 
-- If you don't want the file, you can just the download URL (`forest.fetch(asset_id, dl=True)`) 
-- Or a WMS URL for web mapping (e.g. `forest.fetch(asset_id, wms=True)`) 
+- You can search for asset IDs by geography, data type, and time of year
+  - `forest.search(geography="SantaCruzCounty", metric="CanopyHeight", year=2020)`
+- You can download the data to your loacal machine
+  - `forest.download(asset_id, output_file)`
+- If you don't want the file, you can just fetch the download URL
+  - `forest.fetch(asset_id, dl=True)` 
+- Or a WMS URL for web mapping 
+  - `forest.fetch(asset_id, wms=True)`
  
 CFO data are available for free for non-commercial use. You must have a CFO account, which you can create by visiting [the web map][cfo-web], clicking the menu in the top right corner and selecting "Create an account." Please keep track of the e-mail address and password you used to create your Forest Observatory account, as you'll need them to authenticate API access.
 
@@ -107,9 +111,9 @@ The `forest.search()` function queries the API and returns the assets that match
 ['MendocinoCounty-Vegetation-CanopyCover-2020-Fall-00010m']
 ```
 
-The default behavior of this function is to only return the asset IDs as a list.
+The default behavior of this function is to return the asset IDs as a list.
 
-You can instead return the API JSON data, including asset ID, the spatial extent (`bbox`) of the data, the catalog its stored in, etc. by setting `just_assets=False`.
+You could instead return the API JSON data, including asset ID, the spatial extent (`bbox`) of the data, the catalog its stored in, etc. by setting `just_assets=False`.
 
 ```python
 >>> forest.search(geography="MendocinoCounty", metric="CanopyCover", just_assets=False)
@@ -130,12 +134,12 @@ But with over 17,000 published assets it's not easy to know just what to search 
 
 Based on the asset ID naming convention above, we've provided some `list` functions as a guide to what's available.
 
-- `geography` - CFO datasets have been clipped to different spatial extents: statewide, by county, by municipality, by watershed.
+- Geography - CFO datasets have been clipped to different spatial extents: statewide, by county, by municipality, by watershed.
   - `forest.list_geographies()` - returns the different geographic extents. Use `list_geographies(by="County")` to narrow return just the unique counties.
   - `forest.list_geography_types()` - returns the categories of geographical clipping available.
-- `category` - We currently provide three categories of data.
+- Category - we currently provide three categories of data.
   - `forest.list_categories()` - returns [`Vegetation`, `Weather`, `Wildfire`]
-- `metric` - each category of data contains a list of different available data types
+- Metric - each category of data contains a list of different available data types
   - `forest.list_metrics()` - returns the unique metrics for each category. 
   - Run `list_metrics(category="Weather")` to return only weather-specific metrics.
 
