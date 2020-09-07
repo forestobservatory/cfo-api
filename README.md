@@ -4,14 +4,13 @@
 
 The [California Forest Observatory][cfo-web] (CFO) is a data-driven forest monitoring system that maps the drivers of wildfire behavior across the state—including vegetation fuels, weather, topography & infrastructure—from space.
 
-The `cfo` python library was designed to provide easy access to CFO datasets. Each dataset has a unique `asset_id`, and the `search` and `fetch` workflows were designed to query and download these assets. 
-- You can search for asset IDs by geography, data type, and time of year (`forest.search(geography="SantaCruzCounty", metric="CanopyHeight", year=2020)`)
-- Then fetch a URL to download the file (`forest.fetch(asset_id, dl=True)`) 
-- Or a WMS URL to for web mapping (e.g. `forest.fetch(asset_id, wms=True)`) 
-- There's also a function to directly download the data to your loacal machine (`forest.download(asset_id, output_file)`). 
- 
-All CFO assets are stored and downloaded as GeoTIFFs.
+The `cfo` python library was designed to provide easy access to CFO datasets, provided as geotiffs. Each dataset has a unique `asset_id`, and the `search` and `fetch` workflows were designed to query and download these assets. 
 
+- You can search for asset IDs by geography, data type, and time of year (`forest.search(geography="SantaCruzCounty", metric="CanopyHeight", year=2020)`)
+- You can download the data to your loacal machine (`forest.download(asset_id, output_file)`). 
+- If you don't want the file, you can just the download URL (`forest.fetch(asset_id, dl=True)`) 
+- Or a WMS URL for web mapping (e.g. `forest.fetch(asset_id, wms=True)`) 
+ 
 CFO data are available for free for non-commercial use. You must have a CFO account, which you can create by visiting [the web map][cfo-web], clicking the menu in the top right corner and selecting "Create an account." Please keep track of the e-mail address and password you used to create your Forest Observatory account, as you'll need them to authenticate API access.
 
 You can find support for the CFO API at the [community forum][cfo-forum] and in-depth documentation at [ReadTheDocs][cfo-rtd].
@@ -20,8 +19,9 @@ You can find support for the CFO API at the [community forum][cfo-forum] and in-
 
 - [Installation](#installation)
 - [Authentication](#authentication)
-- [Searching for data](#searching-for-data)
-- [Downloading and visualizing data](#downloading-and-visualizing-data)
+- [Searching for data](#searching)
+- [Downloading data](#downloading)
+- [Serving map tiles](#map-tiles)
 - [Contact](#contact)
 
 # Installation
@@ -83,9 +83,9 @@ The temp file that stores your authentication credentials can sometimes get donk
 forest.authenticate(ignore_temp=True)
 ```
 
-# Searching for data
+# Searching
 
-CFO data are organized by `asset_id`. These IDs contain information on the spatial extent of the data, the category and name of the data, the time of collection, and the spatial resolution with the following format:
+CFO data are organized by `asset_id`. These IDs contain information on the spatial extent of the data, the category and name of the data, the time of collection, and the spatial resolution. Asset IDs follow this naming format:
 
 ```python
 asset_id = {geography}-{category}-{metric}-{year}-{timeOfYear}-{resolution}
@@ -113,7 +113,13 @@ You can instead return the API JSON data, including asset ID, the spatial extent
 
 ```python
 >>> forest.search(geography="MendocinoCounty", metric="CanopyCover", just_assets=False)
-[{'asset_id': 'MendocinoCounty-Vegetation-CanopyCover-2020-Fall-00010m', 'attribute_dict': {}, 'bbox': [-124.022978699284, -122.814767867036, 38.7548320538975, 40.0060478879686], 'catalog': 'cfo', 'description': 'CanopyCover', 'expiration_utc_datetime': '', 'utc_datetime': '2020-07-09 09:52:42.292286+00:00'}]
+[{'asset_id': 'MendocinoCounty-Vegetation-CanopyCover-2020-Fall-00010m',
+'attribute_dict': {},
+'bbox': [-124.022978699284, -122.814767867036, 38.7548320538975, 40.0060478879686],
+'catalog': 'cfo',
+'description': 'CanopyCover',
+'expiration_utc_datetime': '',
+'utc_datetime': '2020-07-09 09:52:42.292286+00:00'}]
 ```
 
 And to examine the full response from the `requests` library, use `forest.search(raw=True)`.
@@ -128,18 +134,65 @@ Based on the asset ID naming convention above, we've provided some `list` functi
   - `forest.list_geographies()` - returns the different geographic extents. Use `list_geographies(by="County")` to narrow return just the unique counties.
   - `forest.list_geography_types()` - returns the categories of geographical clipping available.
 - `category` - We currently provide three categories of data.
-  - `forest.list_categories()` - returns [`Vegetation`, `Weather` and `Wildfire`]
-- `metric` - each category of data contains a list of different data types
-  - `forest.list_metrics()` - returns the unique metrics for each category. Run `list_metrics(category="Weather")` to return only weather-specific metrics.
+  - `forest.list_categories()` - returns [`Vegetation`, `Weather`, `Wildfire`]
+- `metric` - each category of data contains a list of different available data types
+  - `forest.list_metrics()` - returns the unique metrics for each category. 
+  - Run `list_metrics(category="Weather")` to return only weather-specific metrics.
 
 Use these metrics as keywords in searching for data: `id_list = forest.search(geography="FresnoCounty", category="Vegetation")`.
 
+You can also use wildcards in your search:
+
+```python
+>>> forest.search(geography='Plumas*', metric='CanopyHeight')
+['PlumasCounty-Vegetation-CanopyHeight-2020-Fall-00010m',
+'PlumasEurekaMunicipality-Vegetation-CanopyHeight-2020-Fall-00010m',
+'PlumasLakeMunicipality-Vegetation-CanopyHeight-2020-Fall-00010m']
+```
+
 ### A note on availabile datasets
 
-Even though we have a range of geographic extents, resolutions, and metrics, it is **not** the case that we provide all permutations of extent/resolution/metric. For example, we clip all `Vegetation` data to the county level, but we do not clip any `Weather` data that fine. All weather data are only available at the state level. This means you don't really need to specify the geographic extent in your search, and you'll get pretty far with `weather_ids = forest.seearch(metric="WindSpeed")`.
+Even though we have a range of geographic extents, resolutions, and metrics, it is **not** the case that we provide all permutations of extent/resolution/metric. For example, we clip all `Vegetation` data to the county level, but we do not clip any `Weather` data that fine. All weather data are only available at the state level. 
 
-# Downloading and visualizing data
+This means you don't really need to specify the geographic extent in your search. You'll get pretty far with `wind_ids = forest.search(metric="WindSpeed")`.
 
+# Downloading
+
+Once you've generated a list of asset IDs, you can then download the files to your local machine. The `forest.download()` function requires an asset_id string so you'll have to iterate over search results, which are often returned as lists.
+
+Here's an example where we search for and download all data from Mendocino County.
+
+```python
+import cfo
+forest = cfo.api()
+asset_ids = forest.search(geography="MendocinoCounty")
+for asset in asset_ids:
+    forest.download(asset)
+```
+
+Which generates the following output as it downloads each file.
+
+```
+2020-09-07 16:19:24,542 INFO cfo.utils [download] Beginning download for: MendocinoCounty-Vegetation-CanopyHeight-2020-Fall-00010m
+2020-09-07 16:19:28,853 INFO cfo.utils [download] Successfully downloaded MendocinoCounty-Vegetation-CanopyHeight-2020-Fall-00010m to file: /home/slug/MendocinoCounty-Vegetation-CanopyHeight-2020-Fall-00010m.tif
+2020-09-07 16:19:29,359 INFO cfo.utils [download] Beginning download for: MendocinoCounty-Vegetation-CanopyBaseHeight-2020-Fall-00010m
+2020-09-07 16:19:32,321 INFO cfo.utils [download] Successfully downloaded MendocinoCounty-Vegetation-CanopyBaseHeight-2020-Fall-00010m to file: /home/slug/MendocinoCounty-Vegetation-CanopyBaseHeight-2020-Fall-00010m.tif
+...
+```
+
+This function uses the `fetch()` command under the hood to retrieve a URL for where the file is hosted on google cloud storage. It then performs a `GET` call to download the file locally. 
+
+The function will download the file to your current working directory if you don't specify an output file path. You can set a custom output path with `forest.download(asset_id, path)`. This may be tricky if you're downloading multiple datasets, but you could parse the asset_id to generate useful names for output files.
+
+```python
+asset_ids = forest.search(geography="MendocinoCounty")
+for asset in asset_ids:
+    geo, category, metric, year, timeOfYear, res = asset.split("-")
+    output_path = f"/external/downloads/CFO-{metric}-{year}.tif"
+    forest.download(asset, output_path)
+```
+
+# Map tiles
 
 # Contact
 
@@ -150,5 +203,5 @@ The California Forest Observatory API is developed and maintained by [Salo Scien
 
 [cfo-web]: https://forestobservatory.com
 [cfo-forum]: https://groups.google.com/a/forestobservatory.com/g/community
-[cfo-rtd]: 
+[cfo-rtd]: https://www.readthedocs.io
 [salo-web]: https://salo.ai
