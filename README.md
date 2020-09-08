@@ -4,7 +4,7 @@
 
 The [California Forest Observatory][cfo-web] (CFO) is a data-driven forest monitoring system that maps the drivers of wildfire behavior across the state—including vegetation fuels, weather, topography & infrastructure—from space.
 
-The `cfo` python library was designed to provide easy access to CFO datasets, provided as geotiffs. Each dataset has a unique `asset_id`, and the `search` and `fetch` workflows were designed to query and download these assets. 
+The `cfo` python library was designed to provide easy access to CFO datasets (in geotiff format). Each dataset has a unique `asset_id`, and the `search` and `fetch` workflows were designed to query and download these assets. 
 
 - You can search for asset IDs by geography, data type, and time of year
   - `forest.search(geography="SantaCruzCounty", metric="CanopyHeight", year=2020)`
@@ -19,7 +19,7 @@ CFO data are available for free for non-commercial use. You must have a CFO acco
 
 You can find support for the CFO API at the [community forum][cfo-forum] and in-depth documentation at [ReadTheDocs][cfo-rtd].
 
-### Table of contents
+## Table of contents
 
 - [Installation](#installation)
 - [Authentication](#authentication)
