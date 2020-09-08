@@ -24,7 +24,7 @@ You can find support for the CFO API at the [community forum][cfo-forum] and in-
 - [Installation](#installation)
 - [Authentication](#authentication)
 - [Searching for data](#searching)
-- [Downloading data](#downloading)
+- [Downloading data](#downloads)
 - [Serving map tiles](#map-tiles)
 - [Contact](#contact)
 
@@ -51,7 +51,7 @@ import cfo
 forest = cfo.api()
 ```
 
-<img src="cfo-height.png" alt="Canopy Height" style="display:block;margin:auto;width:100%;"/>
+<img src="img/cfo-height.png" alt="Canopy Height" style="display:block;margin:auto;width:100%;"/>
 
 # Authentication
 
@@ -166,7 +166,7 @@ This means you don't really need to specify the geographic extent in your search
 
 <img src="img/cfo-understory.png" alt="Redwood understory" style="display:block;margin:auto;width:100%;"/>
 
-# Downloading
+# Downloads
 
 Once you've generated a list of asset IDs, you can then download the files to your local machine. The `forest.download()` function requires an asset_id string so you'll have to iterate over search results, which are often returned as lists.
 
@@ -215,7 +215,7 @@ Which generates the following output (truncated):
 
 # Map tiles
 
-The `fetch` function also returns URLS for displaying CFO data in web mapping applications as WMS tile layers.
+The `fetch` function also returns URLs for displaying CFO data in web mapping applications as WMS tile layers.
 
 ```python
 forest.fetch("MendocinoCounty-Vegetation-CanopyHeight-2020-Fall-00010m", wms=True)
@@ -243,9 +243,11 @@ m.add_control(control)
 m
 ```
 
+This code, executed in `jupyter-lab`, should look something like this.
+
 <img src="img/ipyleaflet-example.jpg" alt="CFO WMS example" style="display:block;margin:auto;width:100%;"/>
 
-Here's a quick breakdown of what's encoded in the string returned from `fetch`. 
+The URL has a lot of useful information. Here's a quick breakdown of what's encoded in the string returned from `fetch`. 
 
 - The base URL (`https://maps.salo.ai/geoserver/cfo/wms`) is our map server address.
 - Each component following the `?` is a parameter passed to the map server.
