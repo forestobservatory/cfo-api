@@ -1,4 +1,4 @@
-<img src="cfo-logo.png" alt="California Forest Observatory" style="display: block; margin: auto;"/>
+<img src="img/cfo-logo.png" alt="California Forest Observatory" style="display: block;margin:auto;"/>
 
 # Introduction
 
@@ -51,6 +51,8 @@ import cfo
 forest = cfo.api()
 ```
 
+<img src="cfo-height.png" alt="Canopy Height" style="display:block;margin:auto;width:100%;"/>
+
 # Authentication
 
 A Forest Observatory account is required to use the API (sign up free at [forestobservatory.com][cfo-web]).
@@ -86,6 +88,8 @@ The temp file that stores your authentication credentials can sometimes get donk
 ```python
 forest.authenticate(ignore_temp=True)
 ```
+
+<img src="img/cfo-fire.jpg" alt="Spotting during the Rough Fire" style="display:block;margin:auto;width:100%;;"/>
 
 # Searching
 
@@ -160,6 +164,8 @@ Even though we have a range of geographic extents, resolutions, and metrics, it 
 
 This means you don't really need to specify the geographic extent in your search. You'll get pretty far with `wind_ids = forest.search(metric="WindSpeed")`.
 
+<img src="img/cfo-understory.png" alt="Redwood understory" style="display:block;margin:auto;width:100%;;"/>
+
 # Downloading
 
 Once you've generated a list of asset IDs, you can then download the files to your local machine. The `forest.download()` function requires an asset_id string so you'll have to iterate over search results, which are often returned as lists.
@@ -196,11 +202,60 @@ for asset in asset_ids:
     forest.download(asset, output_path)
 ```
 
+Which generates the following output (truncated):
+
+```
+2020-09-07 23:10:02,312 INFO cfo.utils [download] Beginning download for: MendocinoCounty-Vegetation-CanopyHeight-2020-Fall-00010m
+2020-09-07 23:10:25,163 INFO cfo.utils [download] Successfully downloaded MendocinoCounty-Vegetation-CanopyHeight-2020-Fall-00010m to file: /external/downloads/CFO-CanopyHeight-2020.tif
+2020-09-07 23:10:25,596 INFO cfo.utils [download] Beginning download for: MendocinoCounty-Vegetation-CanopyBaseHeight-2020-Fall-00010m
+2020-09-07 23:10:47,965 INFO cfo.utils [download] Successfully downloaded MendocinoCounty-Vegetation-CanopyBaseHeight-2020-Fall-00010m to file: /external/downloads/CFO-CanopyBaseHeight-2020.tif
+...
+```
+
 # Map tiles
+
+The `fetch` function also returns URLS for displaying CFO data in web mapping applications as WMS tile layers.
+
+```python
+forest.fetch("MendocinoCounty-Vegetation-CanopyHeight-2020-Fall-00010m", wms=True)
+'https://maps.salo.ai/geoserver/cfo/wms?layers=cfo:MendocinoCounty-Vegetation-CanopyHeight-2020-Fall-00010m&format="image/png"&styles=vegetation&p0=0.0&p2=1.44&p25=18.0&p30=21.599999999999998&p50=36.0&p60=43.199999999999996&p75=54.0&p90=64.8&p98=70.56&p100=72.0'
+
+```
+
+WMS URLs don't always easily plug and play with different rendering services, but they should work with a little nudging. Here's how to use the above URL to visualize these data in a jupyter notebook with `ipyleaflet`.
+
+```python
+from ipyleaflet import Map, WMSLayer, LayersControl, basemaps
+wms = WMSLayer(
+    url='https://maps.salo.ai/geoserver/cfo/wms?p0=0.0&p2=1.44&p25=18.0&p30=21.599999999999998&p50=36.0&p60=43.199999999999996&p75=54.0&p90=64.8&p98=70.56&p100=72.0',
+    layers="cfo:MendocinoCounty-Vegetation-CanopyHeight-2020-Fall-00010m",
+    name="Mendocino Canopy Height",
+    styles="vegetation",
+    format="image/png8",
+    transparent=True,
+    attribution="Forest Observatory © <a href=https://salo.ai'>Salo Sciences</a>",
+)
+m = Map(basemap=basemaps.Stamen.Terrain, center=(39.39,-123.33), zoom=10)
+m.add_layer(wms)
+control = LayersControl(position='topright')
+m.add_control(control)
+m
+```
+
+<img src="img/ipyleaflet-example.jpg" alt="CFO WMS example" style="display:block;margin:auto;width:100%;;"/>
+
+Here's a quick breakdown of what's encoded in the string returned from `fetch`. 
+
+- The base URL (`https://maps.salo.ai/geoserver/cfo/wms`) is our map server address.
+- Each component following the `?` is a parameter passed to the map server.
+- `layers` specifies which asset to show (and is defined based on `{catalog}:{asset_id}` naming).
+- `format` defines the image format the data are rendered in (use `image/png8` for best performance).
+- `styles` defines the color palette (which you can retrieve with `forest.list_styles()`).
+- the long list of `p0, p2, p25, ..., p100` are parameters we use to render custom raster styles on the fly. These numbers are based on the min/max raster values of a dataset and can be altered on the fly to dynamically scale the data.
 
 # Contact
 
-Issue tracking isn't set up for this repository. Please visit the [Forest Observatory Community Forum][cfo-forum] for technical support. To get in touch directly or to inquire about commercial API access, contact [tech@forestobservatory.com](mailto:tech@forestobservatory.com).
+Issue tracking isn't set up for this repository yet. Please visit the [Forest Observatory Community Forum][cfo-forum] for technical support. To get in touch directly or to inquire about commercial API access, contact [tech@forestobservatory.com](mailto:tech@forestobservatory.com).
 
 The California Forest Observatory API is developed and maintained by [Salo Sciences][salo-web].
 
