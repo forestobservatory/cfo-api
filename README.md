@@ -4,7 +4,7 @@
 
 The [California Forest Observatory][cfo-web] (CFO) is a data-driven forest monitoring system that maps the drivers of wildfire behavior across the state—including vegetation fuels, weather, topography & infrastructure—from space.
 
-The `cfo` python library was designed to provide easy access to CFO datasets (in geotiff format). Each dataset has a unique `asset_id`, and the `search` and `fetch` workflows were designed to query and download these assets. 
+The `cfo` library was designed to provide easy access to CFO datasets. Each dataset has a unique `asset_id`, and the `search` and `fetch` workflows were designed to query and download these assets. 
 
 - You can search for asset IDs by geography, data type, and time of year
   - `forest.search(geography="SantaCruzCounty", metric="CanopyHeight", year=2020)`
@@ -70,7 +70,7 @@ Using any API call (`forest.search()`, `forest.fetch()`, `forest.download()`) wi
 
 You can also authenticate directly with `forest.authenticate()`.
 
-This retrieves an authentication token from the API, which is stored as a temp file for future access (this does not store your e-mail/password). The API reads this stored token and means you won't have to pass your email/password during each session.
+This retrieves an authentication token from the API, which is stored as a temp file for future access (this does not store your e-mail/password). The API reads this stored token, which means you won't have to pass your email/password during each session.
 
 ### Setting environment variables 
 
@@ -101,9 +101,9 @@ asset_id = {geography}-{category}-{metric}-{year}-{timeOfYear}-{resolution}
 
 Some examples:
 
-- A statewide vegetation fuels dateset that's rendered in the `layers` tab: `California-Vegetation-CanopyHeight-2020-Summer-00010m`.
-- A statewide weather dataset queried in the `trends` tab: `California-Weather-WindSpeed-2020-0601-03000m`.
-- A county-level dataset accessed in the `download` tab: `Marin-Vegetation-SurfaceFuels-2020-Spring-00010m`.
+- A statewide vegetation fuels dateset that's rendered in the Layers tab: `California-Vegetation-CanopyHeight-2020-Summer-00010m`.
+- A statewide weather dataset queried in the Trends tab: `California-Weather-WindSpeed-2020-0601-03000m`.
+- A county-level dataset accessed in the Download tab: `Marin-Vegetation-SurfaceFuels-2020-Spring-00010m`.
 
 The `forest.search()` function queries the API and returns the assets that match the search terms.
 
@@ -139,17 +139,17 @@ But with over 17,000 published assets it's not easy to know just what to search 
 Based on the asset ID naming convention above, we've provided some `list` functions as a guide to what's available.
 
 - Geography - CFO datasets have been clipped to different spatial extents: statewide, by county, by municipality, by watershed.
-  - `forest.list_geographies()` - returns the different geographic extents. Use `list_geographies(by="County")` to narrow return just the unique counties.
+  - `forest.list_geographies()` - returns the different geographic extents. Use `forest.list_geographies(by="County")` to narrow return just the unique counties.
   - `forest.list_geography_types()` - returns the categories of geographical clipping available.
 - Category - we currently provide three categories of data.
   - `forest.list_categories()` - returns [`Vegetation`, `Weather`, `Wildfire`]
 - Metric - each category of data contains a list of different available data types
   - `forest.list_metrics()` - returns the unique metrics for each category. 
-  - Run `list_metrics(category="Weather")` to return only weather-specific metrics.
+  - Run `forest.list_metrics(category="Weather")` to return only weather-specific metrics.
 
-Use these metrics as keywords in searching for data: `id_list = forest.search(geography="FresnoCounty", category="Vegetation")`.
+Use these as keywords when searching for data (e.g. `id_list = forest.search(geography="FresnoCounty", category="Vegetation")`).
 
-You can also use wildcards in your search:
+You can also use wildcards:
 
 ```python
 >>> forest.search(geography='Plumas*', metric='CanopyHeight')
@@ -162,7 +162,7 @@ You can also use wildcards in your search:
 
 Even though we have a range of geographic extents, resolutions, and metrics, it is **not** the case that we provide all permutations of extent/resolution/metric. For example, we clip all `Vegetation` data to the county level, but we do not clip any `Weather` data that fine. All weather data are only available at the state level. 
 
-This means you don't really need to specify the geographic extent in your search. You'll get pretty far with `wind_ids = forest.search(metric="WindSpeed")`.
+This means you don't really need to specify the geographic extent if you search for weather data. You'll get pretty far with `wind_ids = forest.search(metric="WindSpeed")`.
 
 <img src="img/cfo-understory.png" alt="Redwood understory" style="display:block;margin:auto;width:100%;"/>
 
@@ -170,7 +170,7 @@ This means you don't really need to specify the geographic extent in your search
 
 Once you've generated a list of asset IDs, you can then download the files to your local machine. The `forest.download()` function requires an asset_id string so you'll have to iterate over search results, which are often returned as lists.
 
-Here's an example where we search for and download all data from Mendocino County.
+Here's how to search for and download all data from Mendocino County.
 
 ```python
 import cfo
@@ -202,7 +202,7 @@ for asset in asset_ids:
     forest.download(asset, output_path)
 ```
 
-Which generates the following output (truncated):
+Which generates the following output:
 
 ```
 2020-09-07 23:10:02,312 INFO cfo.utils [download] Beginning download for: MendocinoCounty-Vegetation-CanopyHeight-2020-Fall-00010m
