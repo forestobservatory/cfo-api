@@ -18,7 +18,7 @@ CATALOG = "cfo"
 
 # logging setup
 logging.basicConfig(
-    level=logging.INFO, format=("%(asctime)s %(levelname)s %(name)s [%(funcName)s] %(message)s"), stream=sys.stdout,
+    level=logging.INFO, format=("%(asctime)s %(levelname)s %(name)s [%(funcName)s] | %(message)s"), stream=sys.stdout,
 )
 LOGGER = logging.getLogger(__name__)
 
@@ -29,6 +29,7 @@ ENDPOINTS = {
     "search": "/data/search",
     "fetch": "/data/fetch",
     "pixel_pick": "/data/pixel_pick",
+    "styles": "/data/styles",
 }
 
 # set the path to package data
@@ -279,6 +280,20 @@ class API(object):
         :returns fetch_types: list of strings
         """
         return ["wms", "signed_url", "uri", "url", "wms_preview"]
+
+    def list_styles(self):
+        """
+        Lists the WMS styles available
+        :returns styles: list of style strings
+        """
+        response = self._styles_request()
+        success, msg = check(response)
+        if success:
+            styles = response.json()["styles"]
+            return styles
+        else:
+            LOGGER.warning(msg)
+            raise
 
     def authenticate(self, ignore_temp: bool = True):
         """
@@ -561,5 +576,17 @@ class API(object):
             "type": fetch_type,
         }
         response = self._session.post(request_url, json=body)
+
+        return response
+
+    @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
+    def _styles_request(self):
+        """
+        Submits the GET request to the styles endpoint
+        :return response: the request response
+        """
+        endpoint = ENDPOINTS["styles"]
+        request_url = f"{URL}{endpoint}"
+        response = self._session.get(request_url)
 
         return response
