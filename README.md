@@ -89,7 +89,7 @@ The temp file that stores your authentication credentials can sometimes get donk
 forest.authenticate(ignore_temp=True)
 ```
 
-<img src="img/cfo-fire.jpg" alt="Spotting during the Rough Fire" style="display:block;margin:auto;width:100%;;"/>
+<img src="img/cfo-fire.jpg" alt="Spotting during the Rough Fire" style="display:block;margin:auto;width:100%;"/>
 
 # Searching
 
@@ -164,7 +164,7 @@ Even though we have a range of geographic extents, resolutions, and metrics, it 
 
 This means you don't really need to specify the geographic extent in your search. You'll get pretty far with `wind_ids = forest.search(metric="WindSpeed")`.
 
-<img src="img/cfo-understory.png" alt="Redwood understory" style="display:block;margin:auto;width:100%;;"/>
+<img src="img/cfo-understory.png" alt="Redwood understory" style="display:block;margin:auto;width:100%;"/>
 
 # Downloading
 
@@ -211,6 +211,7 @@ Which generates the following output (truncated):
 2020-09-07 23:10:47,965 INFO cfo.utils [download] Successfully downloaded MendocinoCounty-Vegetation-CanopyBaseHeight-2020-Fall-00010m to file: /external/downloads/CFO-CanopyBaseHeight-2020.tif
 ...
 ```
+<img src="img/cfo-terrain.jpg" alt="Mono Lake" style="display:block;margin:auto;width:100%;"/>
 
 # Map tiles
 
@@ -242,7 +243,7 @@ m.add_control(control)
 m
 ```
 
-<img src="img/ipyleaflet-example.jpg" alt="CFO WMS example" style="display:block;margin:auto;width:100%;;"/>
+<img src="img/ipyleaflet-example.jpg" alt="CFO WMS example" style="display:block;margin:auto;width:100%;"/>
 
 Here's a quick breakdown of what's encoded in the string returned from `fetch`. 
 
