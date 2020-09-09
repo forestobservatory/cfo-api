@@ -15,7 +15,7 @@ The `cfo` library was designed to provide easy access to CFO datasets. Each data
 - Or a WMS URL for web mapping 
   - `forest.fetch(asset_id, wms=True)`
  
-CFO data are available for free for non-commercial use. You must have a CFO account, which you can create by visiting [the web map][cfo-web], clicking the menu in the top right corner and selecting "Create an account." Please keep track of the e-mail address and password you used to create your Forest Observatory account, as you'll need them to authenticate API access.
+CFO data are available for free for non-commercial use (see the [api terms][api-terms]). You must have a CFO account, which you can create by visiting [the web map][cfo-web], clicking the menu in the top right corner and selecting "Create an account." Please keep track of the e-mail address and password you used to create your Forest Observatory account, as you'll need them to authenticate API access.
 
 You can find support for the CFO API at the [community forum][cfo-forum] and in-depth documentation at [ReadTheDocs][cfo-rtd].
 
@@ -263,6 +263,7 @@ Issue tracking isn't set up for this repository yet. Please visit the [Forest Ob
 The California Forest Observatory API is developed and maintained by [Salo Sciences][salo-web].
 
 
+[api-terms]: https://forestobservatory.com/api.html
 [cfo-web]: https://forestobservatory.com
 [cfo-forum]: https://groups.google.com/a/forestobservatory.com/g/community
 [cfo-rtd]: https://www.readthedocs.io
