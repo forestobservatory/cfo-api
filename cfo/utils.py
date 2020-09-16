@@ -426,13 +426,20 @@ class API(object):
                 LOGGER.info(f"Successfully downloaded {asset_id} to file: {path}")
 
     def fetch(
-        self, asset_id: str, dl: bool = False, wms: bool = False, bucket: bool = False, fetch_types: list = None,
+        self,
+        asset_id: str,
+        dl: bool = False,
+        wms: bool = False,
+        gdal: bool = False,
+        bucket: bool = False,
+        fetch_types: list = [],
     ):
         """
         Fetches the download / map / file url for an asset
         :param asset_id: a CFO asset ID string (often returned from search() )
-        :param dl: specifies whether to return the asset download url (a google cloud signed url)
-        :param wms: specifies whether to return a wms url (for web mapping applications)
+        :param dl: returns the asset download url (a google cloud signed url)
+        :param wms: returns a wms url (for web mapping applications)
+        :param gdal: returns a vsicurl address to read the data using GDAL
         :param bucket: returns a google cloud bucket url to the asset id
         :param fetch_types: the full range of fetch options accepted by the API (from get_fetch_types())
         :return response: the api fetch result. returns a string if only one boolean parameter passed, otherwise a dict.
@@ -444,7 +451,7 @@ class API(object):
         link = "link"
 
         # make sure something is set
-        if True not in [dl, wms, bucket] and True not in fetch_types:
+        if True not in [dl, wms, bucket, gdal] and len(fetch_types) == 0:
             # set a default option
             dl = True
 
@@ -471,6 +478,19 @@ class API(object):
             else:
                 LOGGER.warning(msg)
                 raise
+        if gdal:
+            param = "gdal"
+            response = self._fetch_request(asset_id, fetch_type="uri")
+            success, msg = check(response)
+            if success:
+                uri = response.json()[link]
+                vsi = f"/vsi/{uri[5:]}"
+                responses[param] = vsi
+                params.append(param)
+                n_params += 1
+            else:
+                LOGGER.warning(msg)
+                raise
         if bucket:
             param = "bucket"
             response = self._fetch_request(asset_id, fetch_type="uri")
@@ -484,7 +504,7 @@ class API(object):
                 raise
 
         # run through types last
-        if fetch_types is not None:
+        if len(fetch_types) != 0:
             supported = set(self.list_fetch_types())
             if supported.intersection(set(fetch_types)) != supported:
                 LOGGER.warning(f"Unsupported type parameter passed: [{', '.join(fetch_types)}]")
