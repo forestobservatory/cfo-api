@@ -2,16 +2,30 @@ name: cfo
 
 channels:
   - conda-forge
+  - orfeotoolbox
 
 dependencies:
-  - python=3.7.6
+  - python=3.7
+  - jupyter=1.0.0
+  - matplotlib=3.2.1
+  - otb=7.1.0
   - black
   - flake8
+  - gdal
+  - gepopandas
+  - ipython
+  - ipyleaflet
   - isort
   - mock
+  - pandas
   - pre-commit
   - pytest
   - pytest-cov
+  - rasterio
+  - rtree
+  - scikit-learn
+  - shapely
   - pip
   - pip:
+    - .
     - -r file:requirements.txt
