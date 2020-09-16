@@ -9,3 +9,4 @@ cfo.egg-info/*
 .dockerignore
 .coverage
 *.tif
+demos/.ipynb_checkpoints/*

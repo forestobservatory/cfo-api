@@ -19,6 +19,5 @@ repos:
   hooks:
     -   id: check-yaml
     -   id: check-added-large-files
-    -   id: detect-private-key
     -   id: end-of-file-fixer
     -   id: requirements-txt-fixer

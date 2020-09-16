@@ -11,5 +11,5 @@ setup(
     install_requires=["requests", "retrying"],
     author="Salo Sciences",
     include_package_data=True,
-    package_data={"cfo": ["data/paths.json"]},
+    package_data={"cfo": ["data/paths.json", "data/public.json"]},
 )

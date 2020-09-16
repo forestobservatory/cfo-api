@@ -48,7 +48,7 @@ test:
 
 # conda
 conda-init:
-	@conda env list | grep -q -w ${CONDA_ENV} || conda env create --file environment-dev.yml
+	@conda env list | grep -q -w ${CONDA_ENV} || conda env create --file environment.yml
 	@test -d ${DIR_MAKE} || mkdir ${DIR_MAKE}
 	@touch ${CONDA_UPDATED}
 
