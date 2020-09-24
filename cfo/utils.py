@@ -41,6 +41,10 @@ json_path = os.path.join(package_dir, "data", "paths.json")
 with open(json_path, "r+") as f:
     PATHS = json.loads(f.read())
 
+# set the path to the google storage public key
+key_path = os.path.join(package_dir, "data", "public.json")
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
+
 # create a temp directory to store the jwt authentication token
 TMP_DIR = os.path.join(tempfile.gettempdir(), "cfo")
 TMP_FILE = os.path.join(TMP_DIR, "token")
@@ -49,7 +53,7 @@ if not os.path.exists(TMP_DIR):
 
 
 def auth_required():
-    """Decorator to require authorization before a request is made"""
+    """Decorator to require authorization before an API request is made"""
 
     def decorator(view):
         @wraps(view)
