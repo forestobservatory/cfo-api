@@ -220,7 +220,7 @@ def write_public_key(tf, data: dict):
     :return none: no object returned; an environment variable is updated
     """
     # write the json data
-    tf.file.write(json.dumps(data, indent=2))
+    tf.file.write(json.dumps(data, indent=2) + "\n")
     tf.file.flush()
 
     # point the google auth to this file path
