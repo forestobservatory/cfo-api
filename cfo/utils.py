@@ -42,12 +42,12 @@ json_path = os.path.join(package_dir, "data", "paths.json")
 with open(json_path, "r+") as f:
     PATHS = json.loads(f.read())
 
-# create a temp directory to store the jwt authentication token
+# create a temp directory to store the authentication data
 TMP_DIR = os.path.join(tempfile.gettempdir(), "cfo")
-TMP_KEY = tempfile.NamedTemporaryFile(mode="w+", dir=TMP_DIR, delete=True)
-TMP_FILE = os.path.join(TMP_DIR, "token")
 if not os.path.exists(TMP_DIR):
     os.mkdir(TMP_DIR)
+TMP_KEY = tempfile.NamedTemporaryFile(mode="w+", dir=TMP_DIR, delete=True)
+TMP_FILE = os.path.join(TMP_DIR, "token")
 
 
 def auth_required():
@@ -224,6 +224,7 @@ def write_public_key(tf, data: dict):
     tf.file.flush()
 
     # point the google auth to this file path
+    global os
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = tf.name
 
 
@@ -330,6 +331,12 @@ class API(object):
                     self._session.headers.update(auth)
                     login = False
                     status = 200
+
+                    # get the public auth key
+                    response = self._public_key_request()
+                    if response.status_code == 200:
+                        write_public_key(TMP_KEY, response.json())
+
                 except PermissionError:
                     LOGGER.warning("Unable to read token from temp file")
 
@@ -349,7 +356,7 @@ class API(object):
                 except PermissionError:
                     pass
 
-                # try and get the public auth key
+                # get the public auth key
                 response = self._public_key_request()
                 if response.status_code == 200:
                     write_public_key(TMP_KEY, response.json())
