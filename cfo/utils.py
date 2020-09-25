@@ -31,6 +31,7 @@ ENDPOINTS = {
     "search": "/data/search",
     "fetch": "/data/fetch",
     "pixel_pick": "/data/pixel_pick",
+    "public_key": "/data/public_key",
     "styles": "/data/styles",
 }
 
@@ -41,12 +42,9 @@ json_path = os.path.join(package_dir, "data", "paths.json")
 with open(json_path, "r+") as f:
     PATHS = json.loads(f.read())
 
-# set the path to the google storage public key
-key_path = os.path.join(package_dir, "data", "public.json")
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
-
 # create a temp directory to store the jwt authentication token
 TMP_DIR = os.path.join(tempfile.gettempdir(), "cfo")
+TMP_KEY = tempfile.NamedTemporaryFile(mode="w+", dir=TMP_DIR, delete=True)
 TMP_FILE = os.path.join(TMP_DIR, "token")
 if not os.path.exists(TMP_DIR):
     os.mkdir(TMP_DIR)
@@ -214,6 +212,21 @@ def write_token_file(token: str, path: str):
         f.write(token.encode("utf-8"))
 
 
+def write_public_key(tf, data: dict):
+    """
+    Writes json key data to a temporary file
+    :param tf: the tempfile NamedTemporaryFile object
+    :param data: the public key auth data
+    :return none: no object returned; an environment variable is updated
+    """
+    # write the json data
+    tf.file.write(json.dumps(data, indent=2))
+    tf.file.flush()
+
+    # point the google auth to this file path
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = tf.name
+
+
 class API(object):
     """Utility class for Salo API requests"""
 
@@ -335,6 +348,11 @@ class API(object):
                     write_token_file(token, TMP_FILE)
                 except PermissionError:
                     pass
+
+                # try and get the public auth key
+                response = self._public_key_request()
+                if response.status_code == 200:
+                    write_public_key(TMP_KEY, response.json())
 
             else:
                 LOGGER.warning(f"Authentication failed with status code {status}")
@@ -612,6 +630,19 @@ class API(object):
         :return response: the request response
         """
         endpoint = ENDPOINTS["styles"]
+        request_url = f"{URL}{endpoint}"
+        response = self._session.get(request_url)
+
+        return response
+
+    @auth_required()
+    @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
+    def _public_key_request(self):
+        """
+        Submits the GET request to the public_key endpoint
+        :return response: the request response
+        """
+        endpoint = ENDPOINTS["public_key"]
         request_url = f"{URL}{endpoint}"
         response = self._session.get(request_url)
 
