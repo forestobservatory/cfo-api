@@ -18,7 +18,7 @@ CATALOG = "cfo"
 
 # logging setup
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format=("%(asctime)s %(levelname)s %(name)s [%(funcName)s] | %(message)s"),
     stream=sys.stdout,
 )
@@ -228,6 +228,22 @@ def write_public_key(tf, data: dict):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = tf.name
 
 
+def validate_geography(lon: float, lat: float):
+    """
+    Verifies that latitude and longitude values are valid
+    :param lon: longitude value in degrees
+    :param lat: latitude value in degrees
+    :return valid: boolean for whether the lon/lat values are valid
+    """
+    lon_valid = lon >= -180 and lon <= 180
+    lat_valid = lat >= -90 and lat <= 90
+    valid = lon_valid and lat_valid
+    if not valid:
+        return False
+    else:
+        return True
+
+
 class API(object):
     """Utility class for Salo API requests"""
 
@@ -431,7 +447,7 @@ class API(object):
     def download(self, asset_id: str, path: str = None):
         """
         Downloads a CFO asset to your local machine
-        :param asset_id: a CFO asset ID string (often returned from search() )
+        :param asset_id: a CFO asset ID string (often returned from search())
         :param path: the output file path. Set to ./{asset_id}.tif by default. Appends '.tif' if not set.
         :return:
         """
@@ -558,6 +574,35 @@ class API(object):
         else:
             return responses  # the multi-param dictionary
 
+    def pixel_pick(self, asset_id: str, lon: float, lat: float):
+        """
+        Returns the pixel value at a point coordinate from a CFO asset
+        :param asset_id: a CFO asset ID string (often returned from search())
+        :param lon: the longitude (x) location in decimal degrees
+        :param lat: the latitude (y) location in decimal degrees
+        :return response: the pixel_pick api response.
+        """
+        # verify the geometry is valid
+        if not validate_geography(lon, lat):
+            LOGGER.warning(f"Invalid longitude/latidude values: {lat:0.2f}/{lon:0.2f}")
+            LOGGER.warning("Must be in range [-180, 180] and [-90, 90], respectively.")
+            return None
+
+        # verify the asset ID is valid
+        response = self._search_request(asset_id=asset_id)
+        success, msg = check(response)
+        if not success:
+            LOGGER.warning(f"Invalid asset_id: {asset_id}")
+            LOGGER.warning(msg)
+            return None
+
+        # then get the dang pixel value
+        response = self._pixel_pick_request(asset_id, lon, lat)
+        if not success:
+            LOGGER.warning(msg)
+        else:
+            return response.json()["val"]
+
     @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def _auth_request(self, email: str, password: str):
         """
@@ -669,7 +714,7 @@ class API(object):
         body = {
             "catalog": catalog,
             "asset_id": asset_id,
-            "lon": lon,
+            "lng": lon,
             "lat": lat,
         }
         response = self._session.post(request_url, json=body)
