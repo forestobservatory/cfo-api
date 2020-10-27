@@ -658,7 +658,11 @@ class API(object):
     def _pixel_pick_request(self, asset_id: str, lon: float, lat: float, catalog: str = CATALOG):
         """
         Submits the POST request to the pixel_pick endpoint
-        :param asset_id: a full cfo asset id to request values from
+        :param asset_id: a full cfo asset id to request pixel values from
+        :param lon: the longitude location to request pixel values from
+        :param lat: the latitude location to request pixel values from
+        :param catalog: the data catalog to query
+        :return response: the request response
         """
         endpoint = ENDPOINTS["pixel_pick"]
         request_url = f"{URL}{endpoint}"
