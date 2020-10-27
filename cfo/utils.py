@@ -654,3 +654,20 @@ class API(object):
         response = self._session.get(request_url)
 
         return response
+
+    def _pixel_pick_request(self, asset_id: str, lon: float, lat: float, catalog: str = CATALOG):
+        """
+        Submits the POST request to the pixel_pick endpoint
+        :param asset_id: a full cfo asset id to request values from
+        """
+        endpoint = ENDPOINTS["pixel_pick"]
+        request_url = f"{URL}{endpoint}"
+        body = {
+            "catalog": catalog,
+            "asset_id": asset_id,
+            "lon": lon,
+            "lat": lat,
+        }
+        response = self._session.post(request_url, json=body)
+
+        return response
