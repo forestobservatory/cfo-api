@@ -1,4 +1,4 @@
-<img src="img/cfo-logo.png" alt="California Forest Observatory" style="display: block;margin:auto;"/>
+<img src="https://raw.githubusercontent.com/forestobservatory/cfo-api/master/img/cfo-logo.png" alt="California Forest Observatory" style="display: block;margin:auto;"/>
 
 # Introduction
 
@@ -51,7 +51,7 @@ import cfo
 forest = cfo.api()
 ```
 
-<img src="img/cfo-height.png" alt="Canopy Height" style="display:block;margin:auto;width:100%;"/>
+<img src="https://raw.githubusercontent.com/forestobservatory/cfo-api/master/img/cfo-height.png" alt="Canopy Height" style="display:block;margin:auto;width:100%;"/>
 
 # Authentication
 
@@ -89,7 +89,7 @@ The temp file that stores your authentication credentials can sometimes get donk
 forest.authenticate(ignore_temp=True)
 ```
 
-<img src="img/cfo-fire.jpg" alt="Spotting during the Rough Fire" style="display:block;margin:auto;width:100%;"/>
+<img src="https://raw.githubusercontent.com/forestobservatory/cfo-api/master/img/cfo-fire.jpg" alt="Spotting during the Rough Fire" style="display:block;margin:auto;width:100%;"/>
 
 # Searching
 
@@ -164,7 +164,7 @@ Even though we have a range of geographic extents, resolutions, and metrics, it 
 
 This means you don't really need to specify the geographic extent if you search for weather data. You'll get pretty far with `wind_ids = forest.search(metric="WindSpeed")`.
 
-<img src="img/cfo-understory.png" alt="Redwood understory" style="display:block;margin:auto;width:100%;"/>
+<img src="https://raw.githubusercontent.com/forestobservatory/cfo-api/master/img/cfo-understory.png" alt="Redwood understory" style="display:block;margin:auto;width:100%;"/>
 
 # Downloads
 
@@ -245,7 +245,7 @@ m
 
 This code, executed in `jupyter-lab`, should look something like this.
 
-<img src="img/ipyleaflet-example.jpg" alt="CFO WMS example" style="display:block;margin:auto;width:100%;"/>
+<img src="https://raw.githubusercontent.com/forestobservatory/cfo-api/master/img/ipyleaflet-example.jpg" alt="CFO WMS example" style="display:block;margin:auto;width:100%;"/>
 
 The URL has a lot of useful information. Here's a quick breakdown of what's encoded in the string returned from `fetch`. 
 
