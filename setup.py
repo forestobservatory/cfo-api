@@ -6,6 +6,7 @@ long_description = open("README.md", "r", encoding="utf-8").read()
 setup(
     name="cfo",
     url="https://github.com/forestobservatory/cfo-api",
+    license="MIT",
     description="Python wrappers for accessing Forest Observatory data via the Salo API",
     long_description=long_description,
     long_description_content_type="text/markdown",
