@@ -285,7 +285,13 @@ class API(object):
         Lists the veg metrics needed to create a landscape file
         :return metrics: a list of "Vegetation" metrics used to generate landscape files
         """
-        return ["SurfaceFuels", "CanopyCover", "CanopyHeight", "CanopyBaseHeight", "CanopyBulkDensity"]
+        return [
+            "SurfaceFuels",
+            "CanopyCover",
+            "CanopyHeight",
+            "CanopyBaseHeight",
+            "CanopyBulkDensity",
+        ]
 
     def list_geography_types(self):
         """
@@ -630,7 +636,12 @@ class API(object):
     @auth_required()
     @retry(wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def _search_request(
-        self, catalog: str = CATALOG, asset_id: str = None, bbox: list = None, date: str = None, description: str = None
+        self,
+        catalog: str = CATALOG,
+        asset_id: str = None,
+        bbox: list = None,
+        date: str = None,
+        description: str = None,
     ):
         """
         Submits the POST request to the search endpoint
