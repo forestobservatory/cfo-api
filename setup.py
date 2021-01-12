@@ -23,7 +23,7 @@ setup(
     platforms="any",
     install_requires=["requests", "retrying"],
     author="Salo Sciences",
-    author_email="admin@salo.ai",
+    author_email="cba@salo.ai",
     include_package_data=True,
     package_data={"cfo": ["data/paths.json", "data/public.json"]},
     classifiers=[
