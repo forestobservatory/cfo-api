@@ -14,10 +14,14 @@ The `cfo` library was designed to provide easy access to CFO datasets. Each data
   - `forest.fetch(asset_id, dl=True)` 
 - Or a WMS URL for web mapping 
   - `forest.fetch(asset_id, wms=True)`
- 
-CFO data are available for free for non-commercial use (see the [api terms][api-terms]). You must have a CFO account, which you can create by visiting [the web map][cfo-web], clicking the menu in the top right corner and selecting "Create an account." Please keep track of the e-mail address and password you used to create your Forest Observatory account, as you'll need them to authenticate API access.
 
 You can find support for the CFO API at the [community forum][cfo-forum].
+
+## License
+
+CFO data are available for free for non-commercial use per the [API terms][api-terms]. You must have a CFO account, which you can create by visiting [the web map][cfo-web], clicking the menu in the top right corner and selecting "Create an account." Please keep track of the e-mail address and password you used to create your Forest Observatory account, as you'll need them to authenticate API access.
+
+The software provided here, the `cfo` python API wrapper, is provided with an MIT license. Please do not confuse the license terms for the wrapper with the [terms of use][api-terms] for the API.
 
 ## Table of contents
 
