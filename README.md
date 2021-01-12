@@ -37,7 +37,7 @@ The software provided here, the `cfo` python API wrapper, is provided with an MI
 This library can be installed via `pip` directly from Github.
 
 ```bash
-pip install git+https://github.com/forestobservatory/cfo-api.git
+pip install cfo
 ```
 
 If you don't have `pip` you could also clone the repository locally and install using python's `setuptools`
