@@ -10,7 +10,7 @@ dependencies:
   - matplotlib=3.2.1
   - otb=7.1.0
   - black
-  - earthengine
+  - earthengine-api
   - flake8
   - gdal
   - geopandas
