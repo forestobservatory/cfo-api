@@ -2,16 +2,16 @@ name: cfo
 
 channels:
   - conda-forge
-  - orfeotoolbox
 
 dependencies:
   - python=3.7
   - jupyter=1.0.0
   - matplotlib=3.2.1
-  - otb=7.1.0
   - black
+  - earthengine-api
   - flake8
-  - gdal
+  - folium
+  - gdal>=3.0
   - geopandas
   - ipython
   - ipyleaflet
@@ -29,3 +29,4 @@ dependencies:
   - pip:
     - .
     - -r file:requirements.txt
+    - pystac
