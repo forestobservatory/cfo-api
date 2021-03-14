@@ -238,7 +238,7 @@ wms = WMSLayer(
     styles="vegetation",
     format="image/png8",
     transparent=True,
-    attribution="Forest Observatory © <a href=https://salo.ai'>Salo Sciences</a>",
+    attribution="Forest Observatory © <a href='https://salo.ai'>Salo Sciences</a>",
 )
 m = Map(basemap=basemaps.Stamen.Terrain, center=(39.39,-123.33), zoom=10)
 m.add_layer(wms)
